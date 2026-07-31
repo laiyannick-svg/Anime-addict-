@@ -50,15 +50,22 @@
         .status-bar {
             width: 90%;
             max-width: 400px;
-            margin: 15px 0;
-            background: rgba(0, 0, 0, 0.4);
+            background-color: var(--card-wood);
             border: 1px solid var(--gold);
             border-radius: 8px;
             padding: 10px 15px;
+            margin: 15px 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .status-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
+            width: 100%;
         }
 
         .badge-status {
@@ -183,11 +190,23 @@
         <h1>🏴‍☠️ ANIM'ADDICT</h1>
     </header>
 
+    <!-- Barre de Statut avec Jauge Supabase -->
     <div class="status-bar">
-        <div>
-            <strong style="color: var(--gold);">Nakama :</strong> Staff
+        <div class="status-header">
+            <div><strong style="color: var(--gold);">Nakama :</strong> Staff</div>
+            <div class="badge-status">Base active ⚡</div>
         </div>
-        <div class="badge-status">Base active ⚡</div>
+        
+        <!-- Barre de progression -->
+        <div style="width: 100%; margin-top: 2px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 3px; color: #d0d0d0;">
+                <span>Stockage Supabase</span>
+                <span id="db-usage-text">Calcul...</span>
+            </div>
+            <div style="width: 100%; background: #1a1a1a; height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--gold);">
+                <div id="db-bar" style="width: 1%; height: 100%; background: #2ecc71; transition: width 0.5s;"></div>
+            </div>
+        </div>
     </div>
 
     <main>
@@ -228,6 +247,25 @@
             form.style.display = form.style.display === 'block' ? 'none' : 'block';
         }
 
+        // Calculer l'espace utilisé dans Supabase
+        function mettreAJourJauge(nombreArticles) {
+    const tailleBaseFixe = 24.55; // Poids initial de la base Supabase (Mo)
+    const tailleArticlesKo = nombreArticles * 0.5; // ~0.5 Ko par chronique
+    const tailleTotaleMo = tailleBaseFixe + (tailleArticlesKo / 1024);
+    const maxMo = 500;
+    
+    let pourcentage = (tailleTotaleMo / maxMo) * 100;
+
+    const dbText = document.getElementById('db-usage-text');
+    const dbBar = document.getElementById('db-bar');
+
+    if (dbText && dbBar) {
+        dbText.innerText = `${tailleTotaleMo.toFixed(2)} Mo / 500 Mo (${nombreArticles} articles)`;
+        dbBar.style.width = `${pourcentage}%`;
+    }
+}
+
+
         // Charger les chroniques depuis la base
         async function chargerChroniques() {
             const container = document.getElementById('chroniques-container');
@@ -242,6 +280,9 @@
                     container.innerHTML = `<p style="color: #ff6b6b; text-align:center;">⚠️ Erreur : ${error.message}</p>`;
                     return;
                 }
+
+                // Mettre à jour la jauge avec le nombre total d'articles
+                mettreAJourJauge(data ? data.length : 0);
 
                 if (!data || data.length === 0) {
                     container.innerHTML = `<p style="text-align:center; color: #fff;">Aucune chronique publiée pour le moment.</p>`;
@@ -295,12 +336,10 @@
                 console.error(error);
             } else {
                 alert('Chronique publiée avec succès ! 🎉');
-                // Reinitialiser et masquer le formulaire
                 document.getElementById('titre').value = '';
                 document.getElementById('auteur').value = '';
                 document.getElementById('contenu').value = '';
                 toggleForm();
-                // Recharger les cartes
                 chargerChroniques();
             }
         }
