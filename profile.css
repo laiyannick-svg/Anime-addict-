@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anim'Addict - Profil Chasseur</title>
+  <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+
+  <!-- Quête d'Éveil (Formulaire d'inscription) -->
+  <div id="quest-window" class="system-window">
+    <div class="system-header">
+      <span class="system-title">QUEST NOTIFICATION</span>
+    </div>
+    
+    <div class="system-body">
+      <p class="quest-instructions">
+        [QUÊTE D'ÉVEIL] : Entrez vos identifiants de Chasseur pour synchroniser votre profil avec le Système.
+      </p>
+
+      <form id="hunter-form">
+        <div class="input-group">
+          <label for="hunter-name">NOM DE CHASSEUR</label>
+          <input type="text" id="hunter-name" placeholder="Ex: Sung Jin-woo" required>
+        </div>
+
+        <div class="input-group">
+          <label for="hunter-class">CLASSE SOUHAITÉE</label>
+          <select id="hunter-class">
+            <option value="Invocateur d'Ombres">Invocateur d'Ombres</option>
+            <option value="Mage">Mage</option>
+            <option value="Assassin">Assassin</option>
+            <option value="Guerrier">Guerrier</option>
+            <option value="Guérisseur">Guérisseur</option>
+          </select>
+        </div>
+
+        <button type="submit" class="system-btn">ACCEPTER LA QUÊTE</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Fenêtre de Statut (Débloquée après validation) -->
+  <div id="status-window" class="system-window hidden">
+    <div class="system-header">
+      <span class="system-title">STATUS SYSTEM</span>
+    </div>
+    <div class="system-body">
+      <div class="status-row"><span>NOM :</span> <strong id="stat-name">-</strong></div>
+      <div class="status-row"><span>RANG :</span> <strong class="rank-e">RANG E</strong></div>
+      <div class="status-row"><span>CLASSE :</span> <strong id="stat-class">-</strong></div>
+      <div class="status-row"><span>NIVEAU :</span> <strong>1</strong></div>
+      <hr class="system-divider">
+      <div class="status-row"><span>PRIME / BERRIES :</span> <span class="gold-text">฿ 0</span></div>
+      
+      <button id="reset-btn" class="system-btn danger-btn">RÉINITIALISER LE PROFIL</button>
+    </div>
+  </div>
+
+  <!-- Script pour gérer la logique -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("hunter-form");
+      const questWindow = document.getElementById("quest-window");
+      const statusWindow = document.getElementById("status-window");
+      const resetBtn = document.getElementById("reset-btn");
+
+      const savedHunter = JSON.parse(localStorage.getItem("hunter_profile"));
+      if (savedHunter) {
+        displayProfile(savedHunter);
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const hunterData = {
+          name: document.getElementById("hunter-name").value,
+          hunterClass: document.getElementById("hunter-class").value
+        };
+        localStorage.setItem("hunter_profile", JSON.stringify(hunterData));
+        displayProfile(hunterData);
+      });
+
+      resetBtn.addEventListener("click", () => {
+        localStorage.removeItem("hunter_profile");
+        statusWindow.classList.add("hidden");
+        questWindow.classList.remove("hidden");
+      });
+
+      function displayProfile(data) {
+        document.getElementById("stat-name").innerText = data.name;
+        document.getElementById("stat-class").innerText = data.hunterClass;
+        questWindow.classList.add("hidden");
+        statusWindow.classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>
